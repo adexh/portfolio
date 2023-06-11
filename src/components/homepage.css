@@ -1,11 +1,13 @@
 body {
     background-color: #000000;
 }
+
 .ellipsesparent {
     position: absolute;
     left: 530px;
     top: 98px;
 }
+
 #ellipses1 {
     position: relative;
     width: 329px;
@@ -13,6 +15,7 @@ body {
     left: 0;
     top: 0;
 }
+
 #ellipses2 {
     position: absolute;
     width: 203px;
@@ -20,6 +23,7 @@ body {
     left: 177px;
     top: 173px;
 }
+
 #ellipses3 {
     position: absolute;
     width: 152px;
@@ -27,18 +31,20 @@ body {
     left: 304px;
     top: 299px;
 }
-.rec-1-home{
+
+.rec-1-home {
     position: absolute;
     width: 814.82px;
     height: 415.37px;
     left: 42px;
     top: 138.52px;
-    
+
     background: rgba(0, 240, 255, 0.67);
     filter: blur(25.3274px);
     border-radius: 36.1819px;
 }
-.rec-2-home{
+
+.rec-2-home {
     position: absolute;
     width: 717.85px;
     height: 350.96px;
@@ -49,7 +55,8 @@ body {
     filter: blur(1.44728px);
     border-radius: 26.051px;
 }
-.rec-3-home{
+
+.rec-3-home {
     position: absolute;
     width: 717.85px;
     height: 350.96px;
@@ -61,6 +68,7 @@ body {
 
     border-radius: 20px;
 }
+
 /* .text-box-home{
     position: absolute;
     width: 717.85px;
@@ -84,7 +92,8 @@ body {
     color: rgba(0, 0, 0, 0.9);
     text-shadow: 0px 4.45652px 3.71377px rgba(0, 0, 0, 0.25);
 }
-.home-intro-small{
+
+.home-intro-small {
     position: absolute;
     width: 678.05px;
     height: 154.14px;
@@ -97,31 +106,4 @@ body {
     line-height: 20px;
 
     color: #000000;
-}
-
-.nav-home{
-    font-style: italic;
-    font-weight: 600;
-    font-size: 20.8438px;
-    line-height: 25px;
-    display: flex;
-    align-items: center;
-    text-align: right;
-    
-    color: #FFFFFF;
-    
-    text-shadow: 0px 2.60547px 2.60547px rgba(12, 255, 211, 0.53);
-}
-
-.nav-box {
-    box-sizing: border-box;
-    position: absolute;
-    width: 93x;
-    height: 667px;
-    right: 0;
-    top: 0;
-    background: #363636;
-}
-.nav-box-img{
-    mix-blend-mode: overlay;
 }

@@ -1,20 +1,11 @@
 import './homepage.css'
+import Navbar from './navbar';
 
 function Homepage() {
     document.body.style = { background: '#000000' };
     return (
         <div>
-            <div class='nav-box'>
-                <nav class='nav-home'>
-                    <img src="\13416 1.png" alt="nav techno image" class='nav-box-img' />
-                    <ul>
-                        <li>Home</li>
-                        <li>Blog</li>
-                        <li>Work</li>
-                    </ul>
-                </nav>
-            </div>
-
+            <Navbar />
             <div class='ellipsesparent'>
                 <img src="\1ellipses.png" id='ellipses1' />
                 <img src="\2ellipses.png" id='ellipses2' />

@@ -1,25 +1,17 @@
-import './App.css';
+import './navbar.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-      </header>
-      <nav class='nav'>
-        <ul>
-          <li>
-            Home
-          </li>
-          <li>
-            Blog
-          </li>
-          <li>
-            Works
-          </li>
-        </ul>
-      </nav>
-    </div>
-  );
+function Navbar() {
+    return (
+        <div class='nav-box'>
+            <nav class='nav-home'>
+                <ul class='ul-nav'>
+                    <li>Home</li>
+                    <li>Blog</li>
+                    <li>Work</li>
+                </ul>
+            </nav>
+        </div>
+    );
 }
 
 export default Navbar;
