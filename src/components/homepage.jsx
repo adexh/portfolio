@@ -7,9 +7,9 @@ function Homepage() {
         <div>
             <Navbar />
             <div class='ellipsesparent'>
-                <img src="\1ellipses.png" id='ellipses1' />
-                <img src="\2ellipses.png" id='ellipses2' />
-                <img src='\3ellipses.png' id='ellipses3' />
+                <img src="\ellipses1.png" id='ellipses1' alt="styling-ellipse"/>
+                <img src="\ellipses2.png" id='ellipses2' alt="styling-ellipse"/>
+                <img src='\ellipses3.png' id='ellipses3' alt="styling-ellipse"/>
             </div>
             <div>
                 <div class='rec-1-home'></div>
