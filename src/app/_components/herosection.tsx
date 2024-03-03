@@ -14,7 +14,7 @@ export default function Herosection() {
     <div className="relative overflow-hidden">
       <Meteors className="" number={40} />
       <div className="mt-40 ml-5 sm:ml-10">
-        <h1 className="text-6xl md:text-7xl font-bold dark:text-white ">
+        <h1 className="text-6xl md:text-7xl font-bold text-white ">
           Hi,<br />I am Adesh <span className="sm:inline hidden">Tamrakar</span>
         </h1>
         <h2 className="text-4xl mt-14">

@@ -18,7 +18,7 @@ export function Experience() {
                 {item.title}
               </p>
 
-              <div className="text-lg  prose prose-sm dark:prose-invert">
+              <div className="text-lg  prose prose-sm prose-invert">
                 {/* {item?.image && (
                   <Image
                     src={item.image}
