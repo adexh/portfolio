@@ -31,7 +31,10 @@ export default function Skills() {
   return (
     <>
       <div className="mt-10">
-        <WavyBackground waveWidth={30}><div className="text-4xl text-white font-bold inter-var text-center" >Primary Skills</div></WavyBackground></div>
+        <WavyBackground waveWidth={30}>
+          <div className="text-4xl text-white font-bold inter-var text-center" >Primary Skills</div>
+        </WavyBackground>
+      </div>
       
       <div className="grid grid-cols-3 gap-y-6 mt-10 sm:grid-cols-6">
         {data.map(skill => (
