@@ -11,14 +11,14 @@ export function Experience() {
         <div className="max-w-2xl mx-auto antialiased pt-4 relative">
           {dummyContent.map((item, index) => (
             <div key={`content-${index}`} className="mb-10">
-              <h2 className="bg-black text-white rounded-full text-sm w-fit px-4 py-1 mb-4">
+              <h2 className="bg-black text-white rounded-full text-lg w-fit px-4 py-1 mb-4">
                 {item.badge}
               </h2>
-              <p className={twMerge("text-xl mb-4")}>
+              <p className="text-2xl mb-4">
                 {item.title}
               </p>
 
-              <div className="text-sm  prose prose-sm dark:prose-invert">
+              <div className="text-lg  prose prose-sm dark:prose-invert">
                 {/* {item?.image && (
                   <Image
                     src={item.image}
@@ -40,12 +40,14 @@ export function Experience() {
 
 const dummyContent = [
   {
-    title: "Infosys Ltd | Full Stack Developer | Associate Business Analyst",
+    title: "Infosys Ltd | Full Stack Developer",
     description: (
       <>
         <ul className="list-disc ml-4">
           <li>Utilized various AWS services with NodeJs, implementing serverless backend.</li>
           <li>Engineered and implemented a robust search system based on PostgreSQL full-text search with a ranking system, improving search efficiency and user experience.</li>
+          <li>Worked in frontend development using React.js, enhancing user interfaces and overall user experience.</li>
+          <li>Worked on development of three applications from inception to production.</li>
         </ul>
       </>
     ),
@@ -54,7 +56,7 @@ const dummyContent = [
     //   "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=3540&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
-    title: "Lorem Ipsum Dolor Sit Amet",
+    title: "Tata Consultancy Services (TCS BaNCS) | NodeJs Developer ",
     description: (
       <>
         <ul className="list-disc ml-4">
