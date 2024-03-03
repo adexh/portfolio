@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
-import { Meteors } from "@/components/ui/meteors";
+import { WavyBackground } from "@/components/ui/wavy-background";
 
 export default function Skills() {
 
@@ -30,11 +30,12 @@ export default function Skills() {
   ];
   return (
     <>
-      <div className="text-3xl mt-10 flex justify-center"> <span>Primary Skills</span></div>
+      <div className="mt-10">
+        <WavyBackground waveWidth={30}><div className="text-4xl text-white font-bold inter-var text-center" >Primary Skills</div></WavyBackground></div>
+      
       <div className="grid grid-cols-3 gap-y-6 mt-10 sm:grid-cols-6">
         {data.map(skill => (
           <CardContainer key={skill.title} className="h-28 w-20 mx-5">
-            
             <CardBody className="flex flex-col items-center h-48 w-48 justify-center">
               <CardItem translateZ="100" className="">
                 <Image
