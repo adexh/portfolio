@@ -19,7 +19,7 @@ export function Experience() {
               </p>
 
               <div className="text-sm  prose prose-sm dark:prose-invert">
-                {item?.image && (
+                {/* {item?.image && (
                   <Image
                     src={item.image}
                     alt="blog thumbnail"
@@ -27,7 +27,7 @@ export function Experience() {
                     width="1000"
                     className="rounded-lg mb-10 object-cover"
                   />
-                )}
+                )} */}
                 {item.description}
               </div>
             </div>
