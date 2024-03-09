@@ -26,6 +26,10 @@ export default function Skills() {
     {
       title: "Git",
       icon: "git.svg",
+    },
+    {
+      title: "PostgreSql",
+      icon: "postgresql.svg",
     }
   ];
   return (
