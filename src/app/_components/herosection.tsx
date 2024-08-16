@@ -1,5 +1,6 @@
 import { Meteors } from "@/components/ui/meteors";
 import ResumeButton from "./resumeButton";
+import SocialConnects from "./socialConnects";
 
 export default function Herosection() {
   const exp = () => {
@@ -15,12 +16,13 @@ export default function Herosection() {
     <div className="relative overflow-hidden">
       <Meteors className="" number={40} />
       <div className="mt-40 ml-5 sm:ml-10">
-        <h1 className="text-6xl md:text-6xl font-bold text-white">
+        <h1 className="text-5xl md:text-6xl font-bold text-white">
           Hi,<br />I am Adesh <span className="sm:inline hidden">Tamrakar</span>
         </h1>
-        <h2 className="text-4xl mt-4 sm:flex sm:justify-start sm:items-center">
-          <div>Full-Stack Developer<div className="my-2 text-2xl">Experience - {exp()}+ years</div></div>
-          <div className="sm:ml-8"><ResumeButton /></div>
+        <h2 className="text-3xl mt-4 sm:flex sm:justify-start sm:items-center">
+          <div>Full-Stack Developer<div className="my-2 text-lg sm:text-2xl">Experience - {exp()}+ years</div></div>
+          <div className="sm:ml-16"><ResumeButton /></div>
+          <SocialConnects/>
         </h2>
       </div>
     </div>
