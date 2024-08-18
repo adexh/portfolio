@@ -11,17 +11,17 @@ export default function SocialConnects() {
     {
       metaTitle: "linkedin",
       icon: "linkedin.svg",
-      link: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-    },
-    {
-      metaTitle: "twitter",
-      icon: "twitter.svg",
-      link: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      link: "https://www.linkedin.com/in/adesht"
     },
     {
       metaTitle: "leetcode",
       icon: "leetcode.svg",
-      link: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      link: "https://leetcode.com/u/adexh"
+    },
+    {
+      metaTitle: "twitter",
+      icon: "twitter.svg",
+      link: "https://x.com/tamrakar_adesh"
     }
   ]
 
