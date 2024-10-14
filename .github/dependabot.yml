@@ -15,7 +15,3 @@ updates:
         update-types:
         - "minor"
         - "patch"
-      major-upgrade:
-        applies-to: version-updates
-        update-types:
-        - "major"
