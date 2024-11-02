@@ -16,8 +16,8 @@ export function Projects() {
       </h3>
       <div className="grid grid-cols-1 mb-20 md:grid-cols-2 gap-y-10 gap-x-[10rem]">
         {projects.map((project, index) => (
-          <CardContainer>
-          <div key={index} className="w-fit relative">
+          <CardContainer key={index}>
+          <div className="w-fit relative">
             <div className="cursor-pointer blur-xl rounded-xl bg-gradient-to-r from-indigo-800 via-purple-500 to-pink-800 h-full w-full absolute -z-10"></div>
             <div className=" bg-black rounded-3xl flex flex-col justify-between p-6 tracking-tight text-slate-100/50 md:min-h-[26rem]">
               <div>
