@@ -1,6 +1,8 @@
 import { Meteors } from "@/components/ui/meteors";
-import ResumeButton from "./resumeButton";
+import ResumeButton from "@/components/ui/resumeButton";
 import SocialConnects from "./socialConnects";
+import AnimatedGridPattern from "./ui/animated-grid-pattern";
+import { cn } from "@/utils/cn";
 
 export default function Herosection() {
   const exp = () => {
@@ -13,9 +15,8 @@ export default function Herosection() {
   }
 
   return (
-    <div className="relative overflow-hidden">
-      <Meteors className="" number={40} />
-      <div className="mt-40 ml-5 sm:ml-10">
+    <section className="relative overflow-hidden">
+      <div className="mt-40 ml-16 md:mx-40 justify-center items-center">
         <h1 className="text-5xl md:text-6xl font-bold text-white">
           Hi,<br />I am Adesh <span className="sm:inline hidden">Tamrakar</span>
         </h1>
@@ -25,6 +26,16 @@ export default function Herosection() {
           <SocialConnects/>
         </h2>
       </div>
-    </div>
+      <AnimatedGridPattern
+        numSquares={30}
+        maxOpacity={0.1}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(800px_circle_at_top,white,transparent)]",
+          "inset-x-0h-[200%]",
+        )}
+      />
+    </section>
   )
 }

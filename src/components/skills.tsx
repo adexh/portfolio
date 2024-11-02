@@ -39,8 +39,7 @@ export default function Skills() {
           <div className="text-4xl text-white font-bold inter-var text-center" >Primary Skills</div>
         </WavyBackground>
       </div>
-      
-      <div className="grid grid-cols-3 gap-y-6 mt-10 sm:grid-cols-6">
+      <div className="grid grid-cols-3 gap-y-6 mt-10 md:mx-40 md:grid-cols-6">
         {data.map(skill => (
           <CardContainer key={skill.title} className="h-28 w-20 mx-5">
             <CardBody className="flex flex-col items-center h-48 w-48 justify-center">
