@@ -39,3 +39,5 @@ export const Herosection = React.forwardRef<HTMLElement, {}> ((props, ref) => {
     </section>
   )
 })
+
+Herosection.displayName = "Herosection";
