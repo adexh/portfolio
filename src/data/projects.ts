@@ -5,6 +5,7 @@ export const projects = [
     description: `This application helps any small enterprise manage their projects, clients and employee details.`,
     hrefTitle: "github.com/NextERP",
     source: "https://github.com/adexh/NextERP",
+    live:"http://erp.devrealm.in/",
     image:"nexterp.png"
   },
   {

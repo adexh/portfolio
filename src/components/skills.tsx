@@ -33,7 +33,7 @@ export default function Skills() {
     }
   ];
   return (
-    <>
+    <section id="skillsection">
       <div className="mt-10">
         <WavyBackground waveWidth={30}>
           <div className="text-4xl text-white font-bold inter-var text-center" >Primary Skills</div>
@@ -62,7 +62,6 @@ export default function Skills() {
           </CardContainer>
         ))
         }</div>
-    </>
-
+    </section>
   )
 }

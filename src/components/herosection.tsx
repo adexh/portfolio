@@ -1,10 +1,10 @@
-import { Meteors } from "@/components/ui/meteors";
+import React from "react";
 import ResumeButton from "@/components/ui/resumeButton";
 import SocialConnects from "./socialConnects";
 import AnimatedGridPattern from "./ui/animated-grid-pattern";
 import { cn } from "@/utils/cn";
 
-export default function Herosection() {
+export const Herosection = React.forwardRef<HTMLElement, {}> ((props, ref) => {
   const exp = () => {
     const inputDate = new Date('07-07-2021');
     const currentDate = new Date();
@@ -15,7 +15,7 @@ export default function Herosection() {
   }
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden" ref={ref} id="herosection">
       <div className="mt-40 ml-16 md:mx-40 justify-center items-center">
         <h1 className="text-5xl md:text-6xl font-bold text-white">
           Hi,<br />I am Adesh <span className="sm:inline hidden">Tamrakar</span>
@@ -38,4 +38,4 @@ export default function Herosection() {
       />
     </section>
   )
-}
+})
