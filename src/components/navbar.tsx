@@ -34,7 +34,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky -mt-10 top-0 z-50 flex justify-center items-center">
-      <div className="mt-1 p-2 ring-gray-800 rounded-3xl backdrop-blur-lg ring-1 backdrop-brightness-50">
+      <div className="mt-1 p-2 bg-fuchsia-400/10 shadow-md shadow-fuchsia-700 rounded-3xl backdrop-blur-md backdrop-brightness-50">
         {Menus.map((menu, index) => (
           <a key={index} href={menu.link} className="text-gray-400 text-sm hover:text-gray-300 px-4 py-2"
             onClick={e=> handleScroll(e,menu.link)}
