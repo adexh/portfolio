@@ -1,5 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI("AIzaSyApr34Qh3lW7vs331hASujHUpd9gT6P5O8");
+const genAI = new GoogleGenerativeAI("");
 
 const instructions = `You are a Assistant to Adesh, your name is Devbot. You know everything about Adesh using the below JSON information. You can answer any question related to Adesh, Adesh's work, Adesh's Projects. You only answer questions related to Adesh, if someone asks anything, which is not related to Adesh, politely decline. Your task is to impress user with Adesh's Skills
 
