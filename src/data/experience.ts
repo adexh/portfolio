@@ -1,11 +1,24 @@
 export const Experiences = [
   {
+    companyName: "Ansys Software Pvt Ltd",
+    designation: "R&D Engineer II",
+    descriptionList: [
+      "Contributed to the SPDM Core R&D team to research, design, and implement new features for upcoming software releases.",
+      "Revamped Node.js authorization using an ACL pattern, improving security, scalability, and maintainability.",
+      "Achieved 90% code coverage by developing unit, integration, and end-to-end tests for backend features.",
+      "Authored and improved test cases for business-critical components, increasing reliability and reducing defects.",
+      "Quickly learned Neo4j and wrote efficient, production-grade Cypher queries."
+    ],
+    badge: "April 2025 - Present"
+  },
+  {
     companyName: "Infosys Ltd",
     designation:"Fullstack Developer",
     descriptionList: [
       'Utilized various AWS services with NodeJs, implementing serverless backend.',
-      'Engineered and implemented a robust search system based on PostgreSQL full-text search with a ranking system, improving search efficiency and user experience.',
+      'Engineered a robust search system based on PostgreSQL full-text search with a ranking system, improving search efficiency by 50% and user experience.',
       'Worked in frontend development using React.js, enhancing user interfaces and overall user experience.',
+      'Worked on development of 4 applications from inception to production. Handled end-to-end development, including requirements gathering, design, implementation, testing, and deployment.'
     ],
     badge: "November 2022 - Present",
   },
