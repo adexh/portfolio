@@ -25,18 +25,21 @@ export function Projects() {
                     <h3 className="max-w-xs text-xl mb-4 text-slate-100">
                       {project.title}
                     </h3>
-                    <div className="text-base font-normal">
-                      <span className="text-slate-300 ">
+                    <p className="text-base text-slate-300 font-normal flex flex-col gap-6">
+                      <span>
                         {project.description}
                       </span>
-                      <div className="flex justify-start items-end gap-4">
-                        <a href={project.source} target="_blank" className="transition-transform hover:scale-125 shadow-lg shadow-fuchsia-500 rounded-full"><Image className="mt-2" alt="icon" src={"/socials/github.svg"} width={34} height={34} /></a>
-                        {project.live && <a href={project.live} target="_blank" className="text-lg text-violet-300 hover:underline transition-transform hover:scale-110">Hosted <ExternalLink className="inline" size={16} /></a>}
-                      </div>
-                      <div className="text-sm"></div>
+                      <span className="font-mono ">
+                        {project.stack}
+                      </span>
+                    </p>
+                    <div className="flex justify-start items-end gap-4">
+                      <a href={project.source} target="_blank" className="transition-transform hover:scale-125 shadow-lg shadow-fuchsia-500 rounded-full"><Image className="mt-2" alt="icon" src={"/socials/github.svg"} width={34} height={34} /></a>
+                      {project.live && <a href={project.live} target="_blank" className="text-lg text-violet-300 hover:underline transition-transform hover:scale-110">Hosted <ExternalLink className="inline" size={16} /></a>}
                     </div>
+                    <div className="text-sm"></div>
                   </div>
-                  <div><Image src={"/projects/" + project.image} width={1000} height={1000} alt="thumbnail" className="flex flex-1 rounded-lg mt-4 bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 border-2 border-transparent" /></div>
+                  <div className="mt-6"><Image src={"/projects/" + project.image} width={1000} height={1000} alt="thumbnail" className="flex flex-1 rounded-lg mt-4 bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 border-2 border-transparent" /></div>
                 </div>
               </div>
             </CardBody>
