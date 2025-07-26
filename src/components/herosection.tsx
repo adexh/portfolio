@@ -3,6 +3,7 @@ import ResumeButton from "@/components/ui/resumeButton";
 import SocialConnects from "./socialConnects";
 import AnimatedGridPattern from "./ui/animated-grid-pattern";
 import { cn } from "@/utils/cn";
+import { AIChat } from "./heroAIChat";
 
 export const Herosection = React.forwardRef<HTMLElement, {}> ((props, ref) => {
   const exp = () => {
@@ -25,6 +26,7 @@ export const Herosection = React.forwardRef<HTMLElement, {}> ((props, ref) => {
           <div className="sm:ml-16"><ResumeButton /></div>
           <SocialConnects/>
         </h2>
+          <AIChat />
       </div>
       <AnimatedGridPattern
         numSquares={30}
