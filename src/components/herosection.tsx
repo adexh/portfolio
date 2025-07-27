@@ -5,7 +5,7 @@ import AnimatedGridPattern from "./ui/animated-grid-pattern";
 import { cn } from "@/utils/cn";
 import { AIChat } from "./heroAIChat";
 
-export const Herosection = React.forwardRef<HTMLElement, {}> ((props, ref) => {
+export const Herosection = React.forwardRef<HTMLElement, {}>((props, ref) => {
   const exp = () => {
     const inputDate = new Date('07-07-2021');
     const currentDate = new Date();
@@ -24,10 +24,10 @@ export const Herosection = React.forwardRef<HTMLElement, {}> ((props, ref) => {
         <h2 className="text-3xl mt-4 sm:flex sm:justify-start sm:items-center">
           <div>Full-Stack Developer<div className="my-2 text-lg sm:text-2xl">Experience - {exp()}+ years</div></div>
           <div className="sm:ml-16"><ResumeButton /></div>
-          <SocialConnects/>
+          <SocialConnects />
         </h2>
-          <AIChat />
       </div>
+      <AIChat />
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}

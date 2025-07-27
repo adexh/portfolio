@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { SendHorizontal, CircleX, Sparkles, InfoIcon } from "lucide-react";
+import { SendHorizontal, CircleX, Sparkles, InfoIcon, StopCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreateMLCEngine, MLCEngine, ChatCompletionUserMessageParam } from "@mlc-ai/web-llm";
+import { twMerge } from "tailwind-merge";
+import Popover from "./ui/popover";
 
 export const AIChat = () => {
   const [chat, setChat] = useState<{ id: string; value: string }[]>([]);
@@ -13,9 +15,9 @@ export const AIChat = () => {
   const [loading, setLoading] = useState(false);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [typing, setTyping] = useState(false);
 
-  // ✅ Controller to cancel loading
-  const abortRef = useRef<AbortController | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -28,6 +30,7 @@ export const AIChat = () => {
 
   const handlePromptSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (typing) return;
     if (!chatInput.trim()) return;
 
     setChatBoxView(true);
@@ -75,6 +78,7 @@ export const AIChat = () => {
   }
 
   const generateAIResponse = async (eng: MLCEngine | undefined, question: string) => {
+    setTyping(true);
     let aiResponse = "";
 
     const messages: ChatCompletionUserMessageParam[] = [
@@ -101,6 +105,7 @@ export const AIChat = () => {
     } else {
       setChat((prev) => [...prev, { id: "ai", value: "No Response" }]);
     }
+    setTyping(false);
   };
 
   return (
@@ -109,14 +114,23 @@ export const AIChat = () => {
         {showChatBox && (
           <motion.div
             ref={chatBoxRef}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "12rem", scale: 1 }}
+            initial={{ opacity: 0, height: 0, position: 'absolute' }}
+            animate={{ opacity: 1, height: "auto", position: 'relative' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="relative w-[80%] border-2 border-blue-800 rounded-3xl flex flex-col p-4 overflow-y-auto"
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="relative md:w-[80%] w-auto md:mx-32 mx-4 md:mt-1 mt-4 border-2 border-blue-800 rounded-3xl flex flex-col overflow-y-auto max-h-[20rem]"
           >
-            <div className="sticky top-0 flex justify-between items-center px-2 space-x-4 backdrop-blur-sm bg-gray-800/50 rounded-3xl">
-              <InfoIcon size={20} className="text-blue-500" />
+            <div className="sticky top-0 flex justify-between items-center p-2 space-x-4 backdrop-blur-sm bg-gray-800/50 rounded-3xl">
+              <Popover
+                event="click"
+                content={<p className="text-sm text-white"><div className="text-sm text-white-700">
+                  <strong>This AI runs entirely in your browser.</strong><br />
+                  It does not send any data to a server or make any API requests.<br />
+                  Powered by <a href="https://webllm.mlc.ai/" target="_blank" className="text-blue-600 underline">WebLLM</a>.
+                </div></p>}
+              >
+                <InfoIcon size={20} className="text-blue-500" />
+              </Popover>
               {loading && (
                 <>
                   <span className="min-w-fit text-sm">Loading Model...</span>
@@ -126,9 +140,9 @@ export const AIChat = () => {
                   >
                     Stop
                   </button>
-                  <div className="w-full h-2 bg-gray-700 rounded-lg overflow-hidden">
+                  <div className="w-full bg-gray-700 rounded-lg overflow-hidden">
                     <motion.div
-                      className="h-full bg-green-500"
+                      className="h-2 bg-green-500"
                       initial={{ width: "0%" }}
                       animate={{ width: `${Math.min(progress * 100, 100)}%` }}
                       transition={{ ease: "linear", duration: 0.1 }}
@@ -139,7 +153,7 @@ export const AIChat = () => {
 
               {modelLoaded && (
                 <>
-                  <span className="min-w-fit text-sm">ML Engine is loaded</span>
+                  <span className="min-w-fit text-sm text-green-300">ML Engine is loaded</span>
                 </>
               )}
 
@@ -164,9 +178,9 @@ export const AIChat = () => {
             {chat.map((dialog, index) => (
               <div
                 key={index}
-                className={`p-2 my-2 ${dialog.id === "me"
-                  ? "self-end rounded-2xl bg-purple-600 w-fit"
-                  : "bg-blue-800 rounded-2xl w-fit"
+                className={`p-2 m-2 ${dialog.id === "me"
+                  ? "self-end rounded-2xl bg-purple-600 w-fit ml-10"
+                  : "bg-blue-800 rounded-2xl w-fit mr-10"
                   }`}
               >
                 <p className="flex gap-2">
@@ -177,22 +191,25 @@ export const AIChat = () => {
             ))}
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence >
 
       <form
         onSubmit={handlePromptSubmit}
-        className="flex rounded-2xl border-2 px-4 border-blue-900 h-10 w-[80%] my-4"
+        className={twMerge("flex rounded-2xl border-2 px-4 border-blue-900 h-10 md:w-[80%] w-auto md:mx-32 mx-4 my-4", typing && "bg-gray-600/25 backdrop-blur-sm")}
       >
         <input
           type="text"
-          placeholder="Ask anything about me from AI"
+          placeholder={"Ask anything about me from AI"}
           value={chatInput}
           className="border-none outline-none w-full bg-transparent"
           onChange={(e) => setChatInput(e.target.value)}
           onFocus={() => setChatBoxView(true)}
         />
-        <button>
-          <SendHorizontal />
+        <button
+          type={typing ? "button" : "submit"}
+          onClick={typing ? () => engine?.interruptGenerate() : undefined}
+        >
+          {typing ? <StopCircle /> : <SendHorizontal />}
         </button>
       </form>
     </>
