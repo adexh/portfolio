@@ -11,6 +11,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import { twMerge } from "tailwind-merge";
 import Popover from "./ui/popover";
 
+const CLIENT_FINGERPRINT_HEADER = "x-devbot-client";
+const REQUEST_SIGNATURE_HEADER = "x-devbot-request";
+const CLIENT_RATE_LIMIT_WINDOW_MS = 45_000;
+const CLIENT_RATE_LIMIT_MAX = 3;
+const CLIENT_RATE_LIMIT_COOLDOWN_MS = 30_000;
+type NavigatorWithActivation = Navigator & {
+  userActivation?: {
+    isActive: boolean;
+    hasBeenActive: boolean;
+  };
+};
+
+const createFallbackFingerprint = () => {
+  const seed =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
+  return seed.replace(/[^a-f0-9]/gi, "").padEnd(32, "0").slice(0, 64);
+};
+
 type ChatEntry = {
   id: "me" | "ai";
   value: string;
@@ -25,6 +45,16 @@ export const AIChat = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const [typing, setTyping] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fingerprintReady, setFingerprintReady] = useState(false);
+  const fingerprintRef = useRef<string>("");
+  const [cooldownMs, setCooldownMs] = useState(0);
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rateLimitWindowRef = useRef<{ start: number; count: number }>({
+    start: 0,
+    count: 0,
+  });
+  const [trapTriggered, setTrapTriggered] = useState(false);
+  const userInteractedRef = useRef(false);
   const createAiMessage = (value: string, requestId?: string): ChatEntry => ({
     id: "ai",
     value,
@@ -47,10 +77,192 @@ export const AIChat = () => {
     }
   }, [chat]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const storageKey = "devbot:fingerprint";
+
+    const initializeFingerprint = async () => {
+      if (typeof window === "undefined") {
+        fingerprintRef.current = createFallbackFingerprint();
+        setFingerprintReady(true);
+        return;
+      }
+
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        fingerprintRef.current = stored;
+        setFingerprintReady(true);
+        return;
+      }
+
+      try {
+        const encoder = new TextEncoder();
+        const material = [
+          window.navigator.userAgent,
+          Intl.DateTimeFormat().resolvedOptions().timeZone ?? "unknown",
+          window.screen?.width ?? 0,
+          window.screen?.height ?? 0,
+          window.location.hostname,
+          crypto.randomUUID(),
+        ].join("|");
+
+        const digest = await crypto.subtle.digest(
+          "SHA-256",
+          encoder.encode(material)
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        const fingerprint = Array.from(new Uint8Array(digest))
+          .map((value) => value.toString(16).padStart(2, "0"))
+          .join("");
+
+        fingerprintRef.current = fingerprint;
+        window.localStorage.setItem(storageKey, fingerprint);
+      } catch (error) {
+        console.error("Failed to initialize Devbot fingerprint", error);
+        fingerprintRef.current = createFallbackFingerprint();
+      } finally {
+        if (!cancelled) {
+          setFingerprintReady(true);
+        }
+      }
+    };
+
+    initializeFingerprint();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+        cooldownTimerRef.current = null;
+      }
+    },
+    []
+  );
+
+  const markUserInteraction = () => {
+    userInteractedRef.current = true;
+  };
+
+  const hasRecentUserActivation = () => {
+    if (typeof navigator === "undefined") return true;
+    const navigatorWithActivation = navigator as NavigatorWithActivation;
+    const activation = navigatorWithActivation.userActivation;
+    if (!activation) return true;
+    return activation.isActive || activation.hasBeenActive;
+  };
+
+  const startCooldown = (duration: number) => {
+    if (duration <= 0) return;
+    setCooldownMs(duration);
+    if (cooldownTimerRef.current) {
+      clearInterval(cooldownTimerRef.current);
+    }
+
+    cooldownTimerRef.current = setInterval(() => {
+      setCooldownMs((prev) => {
+        if (prev <= 1000) {
+          if (cooldownTimerRef.current) {
+            clearInterval(cooldownTimerRef.current);
+            cooldownTimerRef.current = null;
+          }
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+  };
+
+  const enforceClientRateLimit = () => {
+    const now = Date.now();
+    const windowData = rateLimitWindowRef.current;
+    if (now - windowData.start > CLIENT_RATE_LIMIT_WINDOW_MS) {
+      windowData.start = now;
+      windowData.count = 0;
+    }
+    windowData.count += 1;
+    if (windowData.count > CLIENT_RATE_LIMIT_MAX) {
+      startCooldown(CLIENT_RATE_LIMIT_COOLDOWN_MS);
+      throw new Error("CLIENT_RATE_LIMITED");
+    }
+  };
+
+  const createRequestSignature = async () => {
+    if (typeof window === "undefined" || typeof crypto === "undefined") {
+      return createFallbackFingerprint();
+    }
+
+    if (!fingerprintRef.current) {
+      return createFallbackFingerprint();
+    }
+
+    try {
+      const encoder = new TextEncoder();
+      const material = [
+        fingerprintRef.current,
+        crypto.randomUUID(),
+        Date.now().toString(),
+      ].join("|");
+
+      const digest = await crypto.subtle.digest(
+        "SHA-256",
+        encoder.encode(material)
+      );
+
+      return Array.from(new Uint8Array(digest))
+        .map((value) => value.toString(16).padStart(2, "0"))
+        .join("");
+    } catch (error) {
+      console.error("Failed to generate request signature", error);
+      return fingerprintRef.current || createFallbackFingerprint();
+    }
+  };
+
   const handlePromptSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    markUserInteraction();
     if (typing) return;
     if (!chatInput.trim()) return;
+    if (!fingerprintReady || !fingerprintRef.current) {
+      setErrorMessage("Initializing secure chat channel. Please try again in a moment.");
+      return;
+    }
+    if (trapTriggered) {
+      setErrorMessage("Automated submissions are not allowed.");
+      return;
+    }
+    if (cooldownMs > 0) {
+      setErrorMessage(
+        `Too many rapid prompts. Please wait ${Math.ceil(
+          cooldownMs / 1000
+        )}s before trying again.`
+      );
+      return;
+    }
+    if (!userInteractedRef.current) {
+      setErrorMessage("Please interact with the chat input before submitting.");
+      return;
+    }
+    if (!hasRecentUserActivation()) {
+      setErrorMessage("Real user interaction is required before sending a prompt.");
+      return;
+    }
+    try {
+      enforceClientRateLimit();
+    } catch {
+      setErrorMessage(
+        "You have reached the temporary chat limit. Please wait before sending another prompt."
+      );
+      return;
+    }
 
     setChatBoxView(true);
     setErrorMessage(null);
@@ -134,9 +346,14 @@ export const AIChat = () => {
     abortControllerRef.current = controller;
 
     try {
+      const requestSignature = await createRequestSignature();
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          [CLIENT_FINGERPRINT_HEADER]: fingerprintRef.current,
+          [REQUEST_SIGNATURE_HEADER]: requestSignature,
+        },
         body: JSON.stringify({ prompt: question, history: historySnapshot }),
         signal: controller.signal,
       });
@@ -354,23 +571,55 @@ export const AIChat = () => {
           typing && "bg-slate-900/80"
         )}
       >
+        <div className="sr-only" aria-hidden="true">
+          <label htmlFor="devbot-topic">Leave this field empty</label>
+          <input
+            id="devbot-topic"
+            name="topic"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            onChange={() => {
+              setTrapTriggered(true);
+              setErrorMessage("Automated submissions detected and blocked.");
+              startCooldown(CLIENT_RATE_LIMIT_COOLDOWN_MS * 2);
+            }}
+          />
+        </div>
         <input
           type="text"
           placeholder={"Ask anything about me from AI"}
           value={chatInput}
           className="w-full border-none bg-transparent text-sm outline-none placeholder:text-slate-400"
-          onChange={(e) => setChatInput(e.target.value)}
-          onFocus={() => setChatBoxView(true)}
+          onChange={(e) => {
+            markUserInteraction();
+            setChatInput(e.target.value);
+          }}
+          onFocus={() => {
+            markUserInteraction();
+            setChatBoxView(true);
+          }}
+          onKeyDown={markUserInteraction}
         />
         <button
           type={typing ? "button" : "submit"}
           onClick={typing ? stopStreaming : undefined}
+          onMouseDown={markUserInteraction}
+          onTouchStart={markUserInteraction}
           className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-500 text-white shadow-lg shadow-cyan-500/40 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={!chatInput.trim() && !typing}
+          disabled={
+            (!chatInput.trim() && !typing) ||
+            (!typing && (cooldownMs > 0 || !fingerprintReady))
+          }
         >
           {typing ? <StopCircle /> : <SendHorizontal />}
         </button>
       </form>
+      {cooldownMs > 0 && (
+        <p className="text-xs text-amber-200 md:mx-32 mx-4 -mt-2">
+          Temporarily throttled for security. Please wait {Math.ceil(cooldownMs / 1000)}s.
+        </p>
+      )}
     </>
   );
 };
