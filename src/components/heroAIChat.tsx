@@ -68,6 +68,28 @@ export const AIChat = () => {
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const aiResponseRef = useRef<string>("");
 
+  const renderAiContent = (value: string) => {
+    const segments = value.split("**");
+    return segments.map((segment, index) => {
+      const key = `ai-segment-${index}`;
+      if (index % 2 === 1) {
+        return (
+          <span
+            key={key}
+            className="bg-gradient-to-r from-cyan-200 via-sky-400 to-fuchsia-400 bg-clip-text font-semibold text-transparent drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]"
+          >
+            {segment}
+          </span>
+        );
+      }
+      return (
+        <span key={key}>
+          {segment}
+        </span>
+      );
+    });
+  };
+
   useEffect(() => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTo({
@@ -518,7 +540,7 @@ export const AIChat = () => {
                         "relative max-w-[85%] rounded-3xl text-sm leading-relaxed shadow-lg shadow-black/30",
                         isAi
                           ? "mr-auto bg-slate-950/80 border border-cyan-500/40"
-                          : "ml-auto bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 text-white px-4 py-3"
+                          : "ml-auto text-white"
                       )}
                     >
                       {isAi ? (
@@ -537,7 +559,7 @@ export const AIChat = () => {
                                 </div>
                               </div>
                               <p className="whitespace-pre-wrap text-slate-100">
-                                {dialog.value}
+                                {renderAiContent(dialog.value)}
                               </p>
                               <div className="mt-4 flex items-center gap-2 text-[11px] text-cyan-200/70">
                                 <span className="h-1.5 w-1.5 animate-ping rounded-full bg-cyan-300" />
@@ -549,10 +571,23 @@ export const AIChat = () => {
                         </>
                       ) : (
                         <>
-                          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-white/80">
-                            You
+                          <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 p-[1px] shadow-[0_10px_40px_rgba(162,64,228,0.45)]">
+                            <div className="relative rounded-[30px] bg-slate-950/70 px-4 py-4 backdrop-blur-xl">
+                              <div className="mb-3 flex items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.35em] text-fuchsia-100/80">
+                                <div className="flex items-center gap-2 tracking-[0.25em]">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-300 shadow-[0_0_8px_rgba(232,121,249,0.95)]" />
+                                  <span className="flex h-5 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 text-[11px] text-white shadow-lg shadow-fuchsia-500/40">
+                                    You
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="pointer-events-none absolute -right-12 top-1/2 h-32 w-32 -translate-y-1/2 rounded-full bg-fuchsia-500/10 blur-3xl -z-10" aria-hidden="true" />
+                              <span className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)] opacity-60" aria-hidden="true" />
+                              <p className="relative whitespace-pre-wrap text-base text-slate-100">
+                                {dialog.value}
+                              </p>
+                            </div>
                           </div>
-                          <p className="whitespace-pre-wrap">{dialog.value}</p>
                         </>
                       )}
                     </div>
