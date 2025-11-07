@@ -44,11 +44,11 @@ const createFixedWindowLimiter = ({
 
     // Opportunistic cleanup to keep the map from growing forever.
     if (store.size > max * 8) {
-      for (const [key, value] of store) {
+      store.forEach((value, key) => {
         if (now - value.windowStart > windowMs * 2) {
           store.delete(key);
         }
-      }
+      });
     }
 
     return { success: true, remaining: Math.max(max - entry.count, 0) };
