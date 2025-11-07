@@ -462,7 +462,7 @@ export const AIChat = () => {
             <div className="flex flex-col gap-4 p-5">
               <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3 text-sm text-white shadow-inner shadow-slate-900/50">
                 <div className="flex items-center gap-3">
-                  <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 text-lg font-semibold">
+                  <div className="relative flex h-11 min-w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 text-lg font-semibold">
                     DT
                     <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/60">
                       <span className="h-2 w-2 rounded-full bg-white" />
@@ -470,7 +470,7 @@ export const AIChat = () => {
                   </div>
                   <div>
                     <p className="text-base font-semibold text-white">Devbot</p>
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-slate-300" >
                       Your Gemini-powered Adesh guide
                     </p>
                   </div>
@@ -495,9 +495,9 @@ export const AIChat = () => {
                       </div>
                     }
                   >
-                    <InfoIcon size={18} className="text-cyan-300" />
+                    <InfoIcon size={18} className="text-cyan-300" offset="100" />
                   </Popover>
-                  <div className="flex items-center gap-1 text-emerald-300">
+                  <div className="hidden sm:flex items-center gap-1 text-emerald-300">
                     <Sparkles size={16} />
                     <span>{typing ? "Streaming..." : "Standing by"}</span>
                   </div>
@@ -547,14 +547,14 @@ export const AIChat = () => {
                         <>
                           <div className="overflow-hidden rounded-3xl border border-cyan-400/30 bg-gradient-to-br from-slate-900 via-slate-900/50 to-slate-900/20 p-[1px]">
                             <div className="rounded-[26px] bg-slate-950/80 p-4">
-                              <div className="mb-3 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/80">
+                              <div className="mb-3 flex flex-col gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-200/80 md:flex-row md:items-center md:justify-between md:gap-3 md:text-xs md:tracking-[0.2em]">
                                 <div className="flex items-center gap-2">
                                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-[11px] text-slate-900">
                                     DB
                                   </span>
                                   Devbot Insight
                                 </div>
-                                <div className="flex items-center gap-1 text-[10px] font-normal text-slate-400">
+                                <div className="flex w-full items-center gap-1 text-[10px] font-normal text-slate-400 md:w-auto md:justify-end">
                                   <Sparkles size={12} /> Gemini Stream
                                 </div>
                               </div>
