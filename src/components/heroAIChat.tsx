@@ -1,23 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { SendHorizontal, CircleX, Sparkles, InfoIcon, StopCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CreateMLCEngine, MLCEngine, ChatCompletionUserMessageParam } from "@mlc-ai/web-llm";
 import { twMerge } from "tailwind-merge";
 import Popover from "./ui/popover";
 
+type ChatEntry = {
+  id: "me" | "ai";
+  value: string;
+  requestId?: string;
+};
+
 export const AIChat = () => {
-  const [chat, setChat] = useState<{ id: string; value: string }[]>([]);
+  const [chat, setChat] = useState<ChatEntry[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [showChatBox, setChatBoxView] = useState<boolean>(false);
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
-
-  const [engine, setEngine] = useState<MLCEngine>();
-  const [loading, setLoading] = useState(false);
-  const [modelLoaded, setModelLoaded] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const pendingAIRequestId = useRef<string | null>(null);
   const [typing, setTyping] = useState(false);
-
-  const ref = useRef<HTMLDivElement>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const createAiMessage = (value: string, requestId?: string): ChatEntry => ({
+    id: "ai",
+    value,
+    requestId,
+  });
+  const generateRequestId = () =>
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -34,78 +44,112 @@ export const AIChat = () => {
     if (!chatInput.trim()) return;
 
     setChatBoxView(true);
-    const userMessage = { id: "me", value: chatInput };
+    setErrorMessage(null);
+    const question = chatInput.trim();
+    const userMessage: ChatEntry = { id: "me", value: question };
+    const historySnapshot = [...chat, userMessage];
     setChat((prev) => [...prev, userMessage]);
-
-    const question = chatInput.toString();
     setChatInput("");
-
-    const eng = await startLoading();
-
-    await generateAIResponse(eng, question);
+    await generateAIResponse(question, historySnapshot);
   };
 
-  const stopLoading = async () => {
-    await engine?.interruptGenerate();
-    await engine?.unload(); // Close the engine if it was created
-
-    setLoading(false);
-    setProgress(0);
+  const stopStreaming = () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
   };
 
-  const startLoading = async () => {
-    if (engine) return engine
+  const updateLatestAiMessage = (value: string, requestId: string) => {
+    setChat((prev) => {
+      const index = prev.findIndex((message) => message.requestId === requestId);
+      if (index === -1) {
+        return [...prev, createAiMessage(value, requestId)];
+      }
+      const updated = [...prev];
+      updated[index] = createAiMessage(value, requestId);
+      return updated;
+    });
+  };
 
-    setLoading(true);
+  const generateAIResponse = async (question: string, historySnapshot: ChatEntry[]) => {
+    setTyping(true);
+    setErrorMessage(null);
+
+    const requestId = generateRequestId();
+    setChat((prev) => [...prev, createAiMessage("", requestId)]);
+    pendingAIRequestId.current = requestId;
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
-      const eng = await CreateMLCEngine("Qwen2.5-0.5B-Instruct-q4f16_1-MLC", {
-        initProgressCallback: ({ progress }: { progress: number }) => {
-          setProgress(progress);
-        }
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: question, history: historySnapshot }),
+        signal: controller.signal,
       });
 
-      setEngine(eng);
-      setLoading(false);
-      setModelLoaded(true);
-
-      return eng;
-    } catch (err: any) {
-      console.error("Model loading failed:", err);
-      alert("Some error while loading the model in the browser");
-      setLoading(false);
-    }
-  }
-
-  const generateAIResponse = async (eng: MLCEngine | undefined, question: string) => {
-    setTyping(true);
-    let aiResponse = "";
-
-    const messages: ChatCompletionUserMessageParam[] = [
-      { role: "user", content: question },
-    ];
-
-    const reply = await eng?.chat.completions.create({ messages, stream: true });
-
-    if (reply) {
-      for await (const chunk of reply) {
-        const delta = chunk.choices[0]?.delta?.content || "";
-        aiResponse += delta;
-
-        setChat((prev) => {
-          const updated = [...prev];
-          if (updated[updated.length - 1]?.id === "ai") {
-            updated[updated.length - 1] = { id: "ai", value: aiResponse };
-          } else {
-            updated.push({ id: "ai", value: aiResponse });
-          }
-          return updated;
-        });
+      if (!response.ok || !response.body) {
+        const message = await response.text();
+        throw new Error(message || "Gemini API error.");
       }
-    } else {
-      setChat((prev) => [...prev, { id: "ai", value: "No Response" }]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let aiResponse = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const segments = buffer.split("\n");
+        buffer = segments.pop() ?? "";
+
+        for (const segment of segments) {
+          if (!segment.trim()) continue;
+          let payload: { type: string; token?: string; message?: string };
+          try {
+            payload = JSON.parse(segment);
+          } catch {
+            continue;
+          }
+
+          if (payload.type === "token" && payload.token) {
+            aiResponse += payload.token;
+            updateLatestAiMessage(aiResponse, requestId);
+          }
+
+          if (payload.type === "error") {
+            throw new Error(payload.message ?? "Gemini stream failed.");
+          }
+        }
+      }
+
+      if (!aiResponse) {
+        updateLatestAiMessage(
+          "I could not generate a response right now.",
+          requestId
+        );
+      }
+    } catch (error: any) {
+      if (error?.name === "AbortError") {
+        updateLatestAiMessage("Stopped generating the reply.", requestId);
+      } else {
+        console.error("AI chat error", error);
+        updateLatestAiMessage(
+          "Something went wrong while talking to Devbot.",
+          requestId
+        );
+        setErrorMessage(
+          error instanceof Error ? error.message : "Failed to reach Devbot."
+        );
+      }
+    } finally {
+      abortControllerRef.current = null;
+      pendingAIRequestId.current = null;
+      setTyping(false);
     }
-    setTyping(false);
   };
 
   return (
@@ -123,49 +167,33 @@ export const AIChat = () => {
             <div className="sticky top-0 flex justify-between items-center p-2 space-x-4 backdrop-blur-sm bg-gray-800/50 rounded-3xl">
               <Popover
                 event="click"
-                content={<p className="text-sm text-white"><div className="text-sm text-white-700">
-                  <strong>This AI runs entirely in your browser.</strong><br />
-                  It does not send any data to a server or make any API requests.<br />
-                  Powered by <a href="https://webllm.mlc.ai/" target="_blank" className="text-blue-600 underline">WebLLM</a>.
-                </div></p>}
+                content={
+                  <div className="text-sm text-white space-y-2 max-w-xs">
+                    <p><strong>Devbot</strong> streams responses from Google Gemini via a secure backend API.</p>
+                    <p>Each answer is grounded in Adesh&rsquo;s portfolio context and politely declines unrelated questions.</p>
+                    <p>Your prompts never leave the encrypted serverless function beyond Gemini.</p>
+                  </div>
+                }
               >
                 <InfoIcon size={20} className="text-blue-500" />
               </Popover>
-              {loading && (
-                <>
-                  <span className="min-w-fit text-sm">Loading Model...</span>
+              <div className="flex flex-1 items-center justify-end gap-3 text-sm">
+                {typing ? (
+                  <span className="flex items-center gap-1 text-emerald-300">
+                    <Sparkles size={16} /> Streaming from Devbot...
+                  </span>
+                ) : (
+                  <span className="text-gray-200">Ask Devbot anything about Adesh.</span>
+                )}
+                {typing && (
                   <button
-                    onClick={stopLoading}
-                    className="text-red-500 px-2 rounded-full hover:scale-110"
+                    onClick={stopStreaming}
+                    className="text-red-500 px-2 rounded-full hover:scale-110 transition"
                   >
                     Stop
                   </button>
-                  <div className="w-full bg-gray-700 rounded-lg overflow-hidden">
-                    <motion.div
-                      className="h-2 bg-green-500"
-                      initial={{ width: "0%" }}
-                      animate={{ width: `${Math.min(progress * 100, 100)}%` }}
-                      transition={{ ease: "linear", duration: 0.1 }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {modelLoaded && (
-                <>
-                  <span className="min-w-fit text-sm text-green-300">ML Engine is loaded</span>
-                </>
-              )}
-
-              {!modelLoaded && !loading && <>
-                <span className="min-w-fit text-sm">Start ML Engine loading or Say Hi</span>
-                <button
-                  onClick={startLoading}
-                  className="text-green-500 px-2 rounded-full hover:scale-110"
-                >
-                  Start
-                </button>
-              </>}
+                )}
+              </div>
 
               <button
                 onClick={() => setChatBoxView(false)}
@@ -174,6 +202,12 @@ export const AIChat = () => {
                 <CircleX />
               </button>
             </div>
+
+            {errorMessage && (
+              <div className="px-4 text-sm text-red-400">
+                {errorMessage}
+              </div>
+            )}
 
             {chat.map((dialog, index) => (
               <div
@@ -207,7 +241,7 @@ export const AIChat = () => {
         />
         <button
           type={typing ? "button" : "submit"}
-          onClick={typing ? () => engine?.interruptGenerate() : undefined}
+          onClick={typing ? stopStreaming : undefined}
         >
           {typing ? <StopCircle /> : <SendHorizontal />}
         </button>
