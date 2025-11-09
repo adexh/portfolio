@@ -88,12 +88,18 @@ export const createCompositeRateLimiter = ({
   return (identifier: string) => {
     const shortVerdict = shortLimiter(identifier);
     if (!shortVerdict.success) {
-      return shortVerdict;
+      return {
+        success: false,
+        retryAfterSeconds: shortVerdict.retryAfterSeconds,
+      };
     }
 
     const longVerdict = longLimiter(identifier);
     if (!longVerdict.success) {
-      return longVerdict;
+      return {
+        success: false,
+        retryAfterSeconds: longVerdict.retryAfterSeconds,
+      };
     }
 
     return {

@@ -1,33 +1,40 @@
 
 export const projects = [
   {
+    title: "AI Course Gen",
+    description: `An AI based on-demand tutorials generator. Users also have option to opt for "Bring your own AI".`,
+    stack: "NextJs, Vite-React, PostgreSQL, Drizzle-kit, Tailwind CSS, vercel, Gemini AI",
+    live: "http://ai-coursegen.devrealm.in/",
+    image: "ai-coursegen.png"
+  },
+  {
     title: "NextERP",
     description: `This application helps any small enterprise manage their projects, clients and employee details.`,
-    stack:"NextJs, ReactJs, PostgreSQL, Vercel Kv (Upstash Redis), Drizzle ORM, Tailwind CSS",
+    stack: "NextJs, ReactJs, PostgreSQL, Vercel Kv (Upstash Redis), Drizzle ORM, Tailwind CSS",
     source: "https://github.com/adexh/NextERP",
-    live:"http://erp.devrealm.in/",
-    image:"nexterp.png"
+    live: "http://erp.devrealm.in/",
+    image: "nexterp.png"
   },
   {
     title: "Course website",
     description: "Course selling website, with home page, course view page and checkout.",
-    stack:"ReactJs, Material UI, MongoDB, ExpressJs",
+    stack: "ReactJs, Material UI, MongoDB, ExpressJs",
     source: "https://github.com/adexh/simple-course-app",
-    image:"course.png"
+    image: "course.png"
   },
   {
     title: "Portfolio",
     description: "Portfolio website built using NextJs and Aceternity UI",
-    stack:"NextJs, ReactJs, Shadcn ui, Tailwind CSS",
-    live:"https://adesh.devrealm.in",
+    stack: "NextJs, ReactJs, Shadcn ui, Tailwind CSS",
+    live: "https://adesh.devrealm.in",
     source: "https://github.com/adexh/portfolio",
-    image:"portfolio.png"
+    image: "portfolio.png"
   },
   {
     title: "Email-IMAP Client",
     description: "Application to sync emails from Outlook and any IMAP-enabled server to Elasticsearch, enabling an in-house email browser client for efficient email management",
-    stack:"ExpressJs, ReactJs, Redis, ElasticSearch, PostgreSql, Drizzle ORM, Typescript, Clean Architecture",
+    stack: "ExpressJs, ReactJs, Redis, ElasticSearch, PostgreSql, Drizzle ORM, Typescript, Clean Architecture",
     source: "https://github.com/adexh/email-imap-client",
-    image:"skeleton-loading-2.jpg"
+    image: "skeleton-loading-2.jpg"
   },
 ]
