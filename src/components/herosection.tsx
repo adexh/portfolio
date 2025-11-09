@@ -7,7 +7,7 @@ import { AIChat } from "./heroAIChat";
 
 export const Herosection = React.forwardRef<HTMLElement, {}>((props, ref) => {
   const exp = () => {
-    const inputDate = new Date('07-07-2021');
+    const inputDate = new Date(2021, 6, 7);
     const currentDate = new Date();
     const timeDiff = currentDate.getTime() - inputDate.getTime();
     const years = timeDiff / (1000 * 3600 * 24 * 365.25);
