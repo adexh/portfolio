@@ -3,11 +3,11 @@ export const Experiences = [
     companyName: "Ansys (Part of Synopsys)",
     designation: "R&D Engineer II",
     descriptionList: [
-      "Contributed to the SPDM Core R&D team to research, design, and implement new features for upcoming software releases.",
-      "Revamped Node.js authorization using an ACL pattern, improving security, scalability, and maintainability.",
-      "Achieved 90% code coverage by developing unit, integration, and end-to-end tests for backend features.",
-      "Authored and improved test cases for business-critical components, increasing reliability and reducing defects.",
-      "Quickly learned Neo4j and wrote efficient, production-grade Cypher queries."
+      "Architected core backend modules in NodeJs for a large-scale enterprise data collaboration platform, enabling high-performance versioning and secure multi-user operations.",
+      "Designed and deployed a distributed file-locking system, reducing data-conflict incidents by 60% and improving concurrent editing stability.",
+      "Built a configurable approval and voting workflow, streamlining file review cycles and cutting turnaround time by ~40%.",
+      "Optimized graph-based data queries, improving query performance by 35% in production workloads.",
+      "Delivered robust, test-driven Node.js services with 90%+ coverage, ensuring reliability and maintainability",
     ],
     badge: "April 2025 - Present"
   },
