@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server";
-import { streamDevbotResponse, type ChatMessage } from "@/server/ai/gemini";
+import {
+  streamDevbotResponse,
+  type ChatMessage,
+  isGeminiRateLimitError,
+} from "@/server/ai/gemini";
 import { constants } from "@/utils/constants";
 import { createCompositeRateLimiter } from "@/server/security/rateLimiter";
 
@@ -187,9 +191,19 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Gemini API request failed", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to reach Gemini API.";
-    const status = message.includes("GEMINI_API_KEY") ? 500 : 502;
+    if (isGeminiRateLimitError(error)) {
+      return buildErrorResponse(
+        "Too many requests right now. Please try again shortly.",
+        429
+      );
+    }
+
+    const missingApiKey =
+      error instanceof Error && error.message.includes("GEMINI_API_KEY");
+    const message = missingApiKey
+      ? "Devbot is not configured correctly. Please reach out to the site owner."
+      : "Devbot is temporarily unavailable. Please try again shortly.";
+    const status = missingApiKey ? 500 : 502;
 
     return buildErrorResponse(message, status);
   }

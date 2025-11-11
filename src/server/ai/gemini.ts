@@ -21,6 +21,100 @@ export type ChatMessage = {
 
 const encoder = new TextEncoder();
 
+const RATE_LIMIT_STATUS_CODE = 429;
+const RATE_LIMIT_CODES = new Set(["RESOURCE_EXHAUSTED", "RATE_LIMIT_EXCEEDED"]);
+const RATE_LIMIT_MESSAGE =
+  "I'm handling too many requests right now. Please try again in a moment.";
+const STREAM_FAILURE_MESSAGE =
+  "I couldn't finish that response. Please try again.";
+
+export class GeminiRateLimitError extends Error {
+  readonly status = RATE_LIMIT_STATUS_CODE;
+
+  constructor(message = RATE_LIMIT_MESSAGE) {
+    super(message);
+    this.name = "GeminiRateLimitError";
+  }
+}
+
+const normalizeErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return "";
+};
+
+const getPossibleStatusCode = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof (error as { status?: unknown }).status === "number"
+  ) {
+    return (error as { status: number }).status;
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    typeof (error as { statusCode?: unknown }).statusCode === "number"
+  ) {
+    return (error as { statusCode: number }).statusCode;
+  }
+  return null;
+};
+
+const getPossibleErrorCode = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof (error as { code?: unknown }).code === "string"
+  ) {
+    return (error as { code: string }).code.toUpperCase();
+  }
+  return null;
+};
+
+export const isGeminiRateLimitError = (error: unknown) => {
+  if (!error) {
+    return false;
+  }
+  if (error instanceof GeminiRateLimitError) {
+    return true;
+  }
+
+  const status = getPossibleStatusCode(error);
+  if (status === RATE_LIMIT_STATUS_CODE) {
+    return true;
+  }
+
+  const code = getPossibleErrorCode(error);
+  if (code && RATE_LIMIT_CODES.has(code)) {
+    return true;
+  }
+
+  const message = normalizeErrorMessage(error).toLowerCase();
+  if (!message) {
+    return false;
+  }
+
+  return (
+    message.includes("too many requests") ||
+    message.includes("rate limit") ||
+    (message.includes("resource") && message.includes("exhaust")) ||
+    message.includes("quota")
+  );
+};
+
 let genAI: GoogleGenerativeAI | null = null;
 let embeddingModel: ReturnType<GoogleGenerativeAI["getGenerativeModel"]> | null =
   null;
@@ -150,14 +244,24 @@ If the question cannot be answered with the context, politely explain that Devbo
     },
   ];
 
-  const streamResult = await model.generateContentStream({
-    contents,
-    generationConfig: {
-      temperature: 0.4,
-      topP: 0.95,
-      topK: 32,
-    },
-  });
+  let streamResult;
+  try {
+    streamResult = await model.generateContentStream({
+      contents,
+      generationConfig: {
+        temperature: 0.4,
+        topP: 0.95,
+        topK: 32,
+      },
+    });
+  } catch (error) {
+    if (isGeminiRateLimitError(error)) {
+      throw new GeminiRateLimitError();
+    }
+    throw error instanceof Error
+      ? error
+      : new Error("Gemini generateContentStream failed.");
+  }
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -171,8 +275,9 @@ If the question cannot be answered with the context, politely explain that Devbo
         controller.enqueue(encoder.encode(JSON.stringify({ type: "done" }) + "\n"));
       } catch (error) {
         console.error("Gemini stream error", error);
-        const message =
-          error instanceof Error ? error.message : "Gemini stream failed.";
+        const message = isGeminiRateLimitError(error)
+          ? RATE_LIMIT_MESSAGE
+          : STREAM_FAILURE_MESSAGE;
         controller.enqueue(
           encoder.encode(JSON.stringify({ type: "error", message }) + "\n")
         );
