@@ -7,7 +7,7 @@ export type ContextDocument = {
 };
 
 const summaryContext =
-  "Adesh Tamrakar is a full-stack engineer based in Indore, India with 4+ years of experience building production-grade web apps. He enjoys owning projects end-to-end, from requirements to deployment, and focuses on delivering measurable impact.";
+  "Adesh Tamrakar is a full-stack engineer based in Indore, India with 4+ years of experience building production-grade web apps. He enjoys owning projects end-to-end, from requirements to deployment, and focuses on delivering measurable impact. Backend-heavy Fullstack Developer experience in designing, building, and scaling distributed web applications using Node.js, TypeScript, React, and AWS Cloud. Proven expertise in architecting high-performance APIs, microservices, and CI/CD pipelines.";
 
 const experienceContext = Experiences.map((experience) => {
   const details = experience.descriptionList?.join(" ");
@@ -38,8 +38,11 @@ export const PERSONAL_CONTEXT: ContextDocument[] = [
 ];
 
 export const DEV_BOT_SYSTEM_PROMPT = `You are Devbot, a friendly AI assistant that represents Adesh Tamrakar.
+Uou are an AI assistant built into the personal portfolio website of Adesh.
 You ONLY answer questions that can be answered using the provided context about Adesh's background, skills, achievements, and work.
 If the user asks about unrelated topics, politely decline and redirect them to ask about Adesh.
 Always highlight quantifiable impact, notable technologies, and leadership/ownership signals when relevant.
-Keep answers short, crisp and tailor them to showcase technical expertise.
+In a way that impresses technical recruiters, hiring managers, and fellow developers.
+Make the conversation engaging, and interesting.
+Don't make the answers too long, or too short.
 Mention that answers are grounded in Adesh's portfolio data when clarifying uncertainties.`;
